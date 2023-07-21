@@ -553,6 +553,12 @@ var AnimationState = new Class({
         return (this.currentFrame) ? this.currentFrame.textureFrame : '';
     },
 
+    getAnimationKey(key) {
+        const suffix = (typeof key === 'string') ? key : key.key
+        const prefix = (typeof this.parent.texture === 'string') ? this.parent.texture : this.parent.texture.key
+        return prefix + "." + suffix
+    },
+
     /**
      * Internal method used to load an animation into this component.
      *
@@ -564,25 +570,21 @@ var AnimationState = new Class({
      *
      * @return {Phaser.GameObjects.GameObject} The Game Object that owns this Animation Component.
      */
-    load: function (key)
-    {
+    load: function (key) {
         if (this.isPlaying)
         {
             this.stop();
         }
 
         var manager = this.animationManager;
-        var animKey = (typeof key === 'string') ? key : GetFastValue(key, 'key', null);
+        var animKey = this.getAnimationKey(key)
 
         //  Get the animation, first from the local map and, if not found, from the Animation Manager
         var anim = (this.exists(animKey)) ? this.get(animKey) : manager.get(animKey);
 
-        if (!anim)
-        {
+        if (!anim) {
             console.warn('Missing animation: ' + animKey);
-        }
-        else
-        {
+        } else {
             this.currentAnim = anim;
 
             //  And now override the animation values, if set in the config.
@@ -839,28 +841,22 @@ var AnimationState = new Class({
      *
      * @return {Phaser.GameObjects.GameObject} The Game Object that owns this Animation Component.
      */
-    play: function (key, ignoreIfPlaying)
-    {
+    play(key, ignoreIfPlaying) {
         if (ignoreIfPlaying === undefined) { ignoreIfPlaying = false; }
 
         var currentAnim = this.currentAnim;
-        var parent = this.parent;
 
         //  Must be either an Animation instance, or a PlayAnimationConfig object
-        var animKey = (typeof key === 'string') ? key : key.key;
+        var animKey = this.getAnimationKey(key)
 
-        if (ignoreIfPlaying && this.isPlaying && currentAnim.key === animKey)
-        {
-            return parent;
+        if (ignoreIfPlaying && this.isPlaying && currentAnim.key === animKey) {
+            return this.parent;
         }
 
         //  Are we mixing?
-        if (currentAnim && this.isPlaying)
-        {
+        if (currentAnim && this.isPlaying) {
             var mix = this.animationManager.getMix(currentAnim.key, key);
-
-            if (mix > 0)
-            {
+            if (mix > 0) {
                 return this.playAfterDelay(key, mix);
             }
         }
@@ -939,7 +935,7 @@ var AnimationState = new Class({
         if (ignoreIfPlaying === undefined) { ignoreIfPlaying = false; }
 
         //  Must be either an Animation instance, or a PlayAnimationConfig object
-        var animKey = (typeof key === 'string') ? key : key.key;
+        var animKey = this.getAnimationKey(key)
 
         if (ignoreIfPlaying && this.isPlaying && this.currentAnim.key === animKey)
         {

@@ -397,16 +397,13 @@ var AnimationManager = new Class({
      *
      * @return {Phaser.Animations.Animation[]} An array of Animation instances that were successfully created.
      */
-    createFromAseprite: function (key, tags, target)
-    {
+    createFromAseprite(key, tags, target) {
         var output = [];
 
         var data = this.game.cache.json.get(key);
 
-        if (!data)
-        {
+        if (!data) {
             console.warn('No Aseprite data found for: ' + key);
-
             return output;
         }
 
@@ -415,12 +412,9 @@ var AnimationManager = new Class({
         var meta = GetValue(data, 'meta', null);
         var frames = GetValue(data, 'frames', null);
 
-        if (meta && frames)
-        {
+        if (meta && frames) {
             var frameTags = GetValue(meta, 'frameTags', []);
-
-            frameTags.forEach(function (tag)
-            {
+            frameTags.forEach(function (tag) {
                 var animFrames = [];
 
                 var name = GetFastValue(tag, 'name', null);
@@ -428,23 +422,16 @@ var AnimationManager = new Class({
                 var to = GetFastValue(tag, 'to', 0);
                 var direction = GetFastValue(tag, 'direction', 'forward');
 
-                if (!name)
-                {
-                    //  Skip if no name
-                    return;
-                }
+                if (!name) { return }
 
-                if (!tags || (tags && tags.indexOf(name) > -1))
-                {
+                if (!tags || (tags && tags.indexOf(name) > -1)) {
                     //  Get all the frames for this tag and calculate the total duration in milliseconds.
                     var totalDuration = 0;
-                    for (var i = from; i <= to; i++)
-                    {
+                    for (var i = from; i <= to; i++) {
                         var frameKey = i.toString();
                         var frame = frames[frameKey];
 
-                        if (frame)
-                        {
+                        if (frame) {
                             var frameDuration = GetFastValue(frame, 'duration', MATH_CONST.MAX_SAFE_INTEGER);
                             animFrames.push({ key: key, frame: frameKey, duration: frameDuration });
                             totalDuration += frameDuration;
@@ -454,42 +441,26 @@ var AnimationManager = new Class({
                     // Fix duration to play nice with how the next tick is calculated.
                     var msPerFrame = totalDuration / animFrames.length;
 
-                    animFrames.forEach(function (entry)
-                    {
-                        entry.duration -= msPerFrame;
-                    });
+                    animFrames.forEach(function (entry) { entry.duration -= msPerFrame })
 
-                    if (direction === 'reverse')
-                    {
-                        animFrames = animFrames.reverse();
-                    }
+                    if (direction === 'reverse') { animFrames = animFrames.reverse() }
 
                     //  Create the animation
                     var createConfig = {
-                        key: name,
+                        key: key + "." + name,
                         frames: animFrames,
                         duration: totalDuration,
                         yoyo: (direction === 'pingpong')
                     };
 
                     var result;
-
-                    if (target)
-                    {
-                        if (target.anims)
-                        {
-                            result = target.anims.create(createConfig);
-                        }
-                    }
-                    else
-                    {
+                    if (target) {
+                        if (target.anims) { result = target.anims.create(createConfig) }
+                    } else {
                         result = _this.create(createConfig);
                     }
 
-                    if (result)
-                    {
-                        output.push(result);
-                    }
+                    if (result) { output.push(result) }
                 }
             });
         }
@@ -518,30 +489,19 @@ var AnimationManager = new Class({
      *
      * @return {(Phaser.Animations.Animation|false)} The Animation that was created, or `false` if the key is already in use.
      */
-    create: function (config)
-    {
+    create(config) {
         var key = config.key;
-
         var anim = false;
-
-        if (key)
-        {
+        if (key) {
             anim = this.get(key);
-
-            if (!anim)
-            {
+            if (!anim) {
                 anim = new Animation(this, key, config);
-
                 this.anims.set(key, anim);
-
                 this.emit(Events.ADD_ANIMATION, key, anim);
-            }
-            else
-            {
+            } else {
                 console.warn('AnimationManager key already exists: ' + key);
             }
         }
-
         return anim;
     },
 
