@@ -519,11 +519,9 @@ var Animation = new Class({
      *
      * @return {Phaser.Animations.AnimationFrame} The frame closest to the given progress value.
      */
-    getFrameByProgress: function (value)
-    {
-        value = Clamp(value, 0, 1);
-
-        return FindClosestInSorted(value, this.frames, 'progress');
+    getFrameByProgress(value) {
+        value = Clamp(value, 0, 1)
+        return FindClosestInSorted(value, this.frames, 'progress')
     },
 
     /**
@@ -534,39 +532,24 @@ var Animation = new Class({
      *
      * @param {Phaser.Animations.AnimationState} state - The Animation State to advance.
      */
-    nextFrame: function (state)
-    {
-        var frame = state.currentFrame;
-
-        if (frame.isLast)
-        {
+    nextFrame(state) {
+        var frame = state.currentFrame
+        if (frame.isLast) {
             //  We're at the end of the animation
-
             //  Yoyo? (happens before repeat)
-            if (state.yoyo)
-            {
-                this.handleYoyoFrame(state, false);
-            }
-            else if (state.repeatCounter > 0)
-            {
+            if (state.yoyo) {
+                this.handleYoyoFrame(state, false)
+            } else if (state.repeatCounter > 0) {
                 //  Repeat (happens before complete)
-
-                if (state.inReverse && state.forward)
-                {
+                if (state.inReverse && state.forward) {
                     state.forward = false;
-                }
-                else
-                {
+                } else {
                     this.repeatAnimation(state);
                 }
-            }
-            else
-            {
+            } else {
                 state.complete();
             }
-        }
-        else
-        {
+        } else {
             this.updateAndGetNextTick(state, frame.nextFrame);
         }
     },
@@ -679,11 +662,10 @@ var Animation = new Class({
      * @param {Phaser.Animations.AnimationState} state - The Animation State.
      * @param {Phaser.Animations.AnimationFrame} frame - An Animation frame.
      */
-    updateAndGetNextTick: function (state, frame)
+    updateAndGetNextTick(state, frame)
     {
-        state.setCurrentFrame(frame);
-
-        this.getNextTick(state);
+        state.setCurrentFrame(frame)
+        this.getNextTick(state)
     },
 
     /**

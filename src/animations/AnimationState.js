@@ -849,6 +849,12 @@ var AnimationState = new Class({
         //  Must be either an Animation instance, or a PlayAnimationConfig object
         var animKey = this.getAnimationKey(key)
 
+        if ( typeof key === 'object' && 'duration' in key ) {
+            this.timeScale = this.duration / key.duration
+        } else {
+            this.timeScale = 1
+        }
+
         if (ignoreIfPlaying && this.isPlaying && currentAnim.key === animKey) {
             return this.parent;
         }
@@ -1011,18 +1017,11 @@ var AnimationState = new Class({
      * @private
      * @since 3.50.0
      */
-    handleStart: function ()
-    {
-        if (this.showOnStart)
-        {
-            this.parent.setVisible(true);
-        }
-
-        this.setCurrentFrame(this.currentFrame);
-
-        this.hasStarted = true;
-
-        this.emitEvents(Events.ANIMATION_START);
+    handleStart() {
+        if (this.showOnStart) { this.parent.setVisible(true) }
+        this.setCurrentFrame(this.currentFrame)
+        this.hasStarted = true
+        this.emitEvents(Events.ANIMATION_START)
     },
 
     /**
@@ -1474,69 +1473,45 @@ var AnimationState = new Class({
      * @param {number} time - The current timestamp.
      * @param {number} delta - The delta time, in ms, elapsed since the last frame.
      */
-    update: function (time, delta)
-    {
+    update(time, delta) {
         var anim = this.currentAnim;
 
-        if (!this.isPlaying || !anim || anim.paused)
-        {
-            return;
-        }
+        if (!this.isPlaying || !anim || anim.paused)  { return }
 
         this.accumulator += delta * this.timeScale;
 
-        if (this._pendingStop === 1)
-        {
-            this._pendingStopValue -= delta;
-
-            if (this._pendingStopValue <= 0)
-            {
-                return this.stop();
-            }
+        if (this._pendingStop === 1) {
+            this._pendingStopValue -= delta; 
+            if (this._pendingStopValue <= 0) { return this.stop() }
         }
 
-        if (!this.hasStarted)
-        {
-            if (this.accumulator >= this.delayCounter)
-            {
-                this.accumulator -= this.delayCounter;
-
+        if (!this.hasStarted) {
+            if (this.accumulator >= this.delayCounter) {
+                this.accumulator -= this.delayCounter
                 this.handleStart();
             }
-        }
-        else if (this.accumulator >= this.nextTick)
-        {
-            //  Process one frame advance as standard
+        } else if (this.accumulator >= this.nextTick) {
 
-            if (this.forward)
-            {
-                anim.nextFrame(this);
-            }
-            else
-            {
-                anim.previousFrame(this);
+            //  Process one frame advance as standard
+            if (this.forward) {
+                anim.nextFrame(this)
+            } else {
+                anim.previousFrame(this)
             }
 
             //  And only do more if we're skipping frames and have time left
-            if (this.isPlaying && this._pendingStop === 0 && this.skipMissedFrames && this.accumulator > this.nextTick)
-            {
+            if (this.isPlaying && this._pendingStop === 0 && this.skipMissedFrames && this.accumulator > this.nextTick) {
                 var safetyNet = 0;
-
-                do
-                {
-                    if (this.forward)
-                    {
-                        anim.nextFrame(this);
+                do {
+                    if (this.forward) {
+                        anim.nextFrame(this)
+                    } else {
+                        anim.previousFrame(this)
                     }
-                    else
-                    {
-                        anim.previousFrame(this);
-                    }
-
                     safetyNet++;
-
                 } while (this.isPlaying && this.accumulator > this.nextTick && safetyNet < 60);
             }
+
         }
     },
 
@@ -1611,14 +1586,9 @@ var AnimationState = new Class({
      *
      * @return {Phaser.GameObjects.GameObject} The Game Object this Animation Component belongs to.
      */
-    nextFrame: function ()
-    {
-        if (this.currentAnim)
-        {
-            this.currentAnim.nextFrame(this);
-        }
-
-        return this.parent;
+    nextFrame() {
+        if (this.currentAnim) { this.currentAnim.nextFrame(this) }
+        return this.parent
     },
 
     /**
